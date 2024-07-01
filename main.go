@@ -54,9 +54,9 @@ func main() {
 	}
 	// debug the color code and the substring and the input string
 
-	fmt.Printf("Colorcode is %s\n", colorCode)
-	fmt.Printf("Substring is %s\n", substring)
-	fmt.Printf("Inputstring is %s\n", inputString)
+	// fmt.Printf("Colorcode is %s\n", colorCode)
+	// fmt.Printf("Substring is %s\n", substring)
+	// fmt.Printf("Inputstring is %s\n", inputString)
 
 	// Read the default banner file (standard)
 	banner, err := readBannerFile("standard")
@@ -94,6 +94,9 @@ func AsciiArt(words []string, contents2 []string, substring, colorCode string) s
 	var result strings.Builder
 	reset := "\033[0m" // Reset color code
 
+	fmt.Printf("Colorcode is  %s\n", colorCode)
+	fmt.Printf("Substring is  %s\n", substring)
+
 	countSpace := 0
 	for _, word := range words {
 		if word != "" {
@@ -110,9 +113,13 @@ func AsciiArt(words []string, contents2 []string, substring, colorCode string) s
 					index := int(char-' ')*9 + 1 + i
 					line := contents2[index]
 
-					// Apply color if the character is part of the substring
+					fmt.Println("Original line is", line)
+
+					// Apply color to all substring occurrences in line
 					if substring != "" && strings.Contains(line, substring) {
-						coloredLine := strings.Replace(colorCode+line, substring, colorCode+substring+reset, -1)
+						// Replace all the occurrences(hence the -1) of the substring with the colored substring and then reset code
+						coloredLine := strings.Replace(line, substring, colorCode+substring+reset, -1)
+						fmt.Println("Colored line is", coloredLine)
 						result.WriteString(coloredLine)
 					} else {
 						result.WriteString(line)
