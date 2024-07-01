@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "bufio"
 	"bufio"
 	"flag"
 	"fmt"
@@ -53,6 +52,11 @@ func main() {
 		fmt.Printf("Unknown color: %s\n", *colorFlag)
 		return
 	}
+	// debug the color code and the substring and the input string
+
+	fmt.Printf("Colorcode is %s\n", colorCode)
+	fmt.Printf("Substring is %s\n", substring)
+	fmt.Printf("Inputstring is %s\n", inputString)
 
 	// Read the default banner file (standard)
 	banner, err := readBannerFile("standard")
@@ -63,8 +67,7 @@ func main() {
 
 	// Generate and color the ASCII art
 	asciiArt := AsciiArt([]string{inputString}, banner, substring, colorCode)
-	
-	
+
 	// Print the result
 	fmt.Println(asciiArt)
 }
