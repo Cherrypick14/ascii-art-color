@@ -94,36 +94,55 @@ func AsciiArt(words []string, contents2 []string, substring, colorCode string) s
 	var result strings.Builder
 	reset := "\033[0m" // Reset color code
 
+	
+
 	fmt.Printf("Colorcode is  %s\n", colorCode)
 	fmt.Printf("Substring is  %s\n", substring)
 
 	countSpace := 0
+	sub := false // checker
+	position := 0 
+
 	for _, word := range words {
+		indexs := subIndexs(word, substring)
 		if word != "" {
 			for i := 0; i < 8; i++ {
-				for _, char := range word {
+				for k, char := range word {
+					if validIndex(k, indexs){
+						result.WriteString(colorCode)
+						sub = true
+						position = k
+					}
 					if char == '\n' {
 						continue
 					}
 					if !(char >= 32 && char <= 126) {
 						return "Error: Input contains non-ASCII characters"
 					}
-
 					// Calculate the index of 'char' in the ASCII art content2.
-					index := int(char-' ')*9 + 1 + i
-					line := contents2[index]
+                    index := int(char-' ')*9 + 1 + i
 
-					fmt.Println("Original line is", line)
+					// Append the corresponding ASCII art line for the character.
+					result.WriteString(contents2[index])
+
+					
+					if sub && k == position+len(substring)-1{
+						result.WriteString(reset)
+					}
+
+					// line := contents2[index]
+
+					// fmt.Println("Original line is", line)
 
 					// Apply color to all substring occurrences in line
-					if substring != "" && strings.Contains(line, substring) {
-						// Replace all the occurrences(hence the -1) of the substring with the colored substring and then reset code
-						coloredLine := strings.Replace(line, substring, colorCode+substring+reset, -1)
-						fmt.Println("Colored line is", coloredLine)
-						result.WriteString(coloredLine)
-					} else {
-						result.WriteString(line)
-					}
+					// if substring != "" && strings.Contains(line, substring) {
+					// 	// Replace all the occurrences(hence the -1) of the substring with the colored substring and then reset code
+					// 	coloredLine := strings.Replace(line, substring, colorCode+substring+reset, -1)
+					// 	fmt.Println("Colored line is", coloredLine)
+					// 	result.WriteString(coloredLine)
+					// } else {
+					// 	result.WriteString(line)
+					// }
 				}
 				result.WriteString("\n")
 			}
@@ -136,6 +155,32 @@ func AsciiArt(words []string, contents2 []string, substring, colorCode string) s
 	}
 	return result.String()
 }
+
+func subIndexs(s, subStr string)[]int{
+    index := []int{}
+    leftCharacters := 0
+    
+    for{
+        idx:= strings.Index(s, subStr)
+        if idx == -1{
+            break
+        }
+        index = append(index, idx+leftCharacters)
+        s = s[idx+len(subStr):]
+        leftCharacters += idx+len(subStr)
+    }
+    return index
+}
+
+func validIndex(index int, indexs []int)bool{
+	for _, idx := range indexs{
+		if index == idx{
+			return true
+		}
+	}
+	return false
+}
+
 
 // func colorSubstring(input, substring, colorCode string) string {
 // 	if substring == "" {
