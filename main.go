@@ -30,7 +30,7 @@ func main() {
 
 	// Check if enough arguments are provided
 	if *colorFlag == "" || len(flag.Args()) < 1 {
-		fmt.Println("Usage: go run . --color=<color> <substring to be colored> [STRING]")
+		printUsage()
 		return
 	}
 
@@ -41,9 +41,10 @@ func main() {
 	if len(args) == 1 {
 		substring = ""
 		inputString = args[0]
-	} else {
+	} else if len(args) == 2 {
 		substring = args[0]
-		inputString = strings.Join(args[1:], " ")
+		inputString = args[1]
+		//inputString = strings.Join(args[1:], " ")
 	}
 
 	// Get the color code
@@ -52,11 +53,6 @@ func main() {
 		fmt.Printf("Unknown color: %s\n", *colorFlag)
 		return
 	}
-	// debug the color code and the substring and the input string
-
-	// fmt.Printf("Colorcode is %s\n", colorCode)
-	// fmt.Printf("Substring is %s\n", substring)
-	// fmt.Printf("Inputstring is %s\n", inputString)
 
 	// Read the default banner file (standard)
 	banner, err := readBannerFile("standard")
@@ -179,6 +175,11 @@ func validIndex(index int, indexs []int) bool {
 	return false
 }
 
+func printUsage() {
+	fmt.Println("Usage: go run . [OPTION] [STRING]\n\nEX: go run . --color=<color> <substring to be colored> \"something\"")
+
+}
+
 // func colorSubstring(input, substring, colorCode string) string {
 // 	if substring == "" {
 // 		// Color the entire string
@@ -255,9 +256,4 @@ func validIndex(index int, indexs []int) bool {
 // 		return color + text + "\033[0m"
 // 	}
 // 	return strings.ReplaceAll(text, substring, color+substring+"\033[0m")
-// }
-
-// func printUsage() {
-// 	fmt.Println("Usage: go run . [OPTION] [STRING]")
-// 	fmt.Println("EX: go run . --color=<color> <substring to be colored> \"something\"")
 // }
