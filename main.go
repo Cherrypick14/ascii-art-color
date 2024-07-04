@@ -94,24 +94,23 @@ func AsciiArt(words []string, contents2 []string, substring, colorCode string) s
 	var result strings.Builder
 	reset := "\033[0m" // Reset color code
 
-	
-
 	fmt.Printf("Colorcode is  %s\n", colorCode)
 	fmt.Printf("Substring is  %s\n", substring)
 
 	countSpace := 0
 	sub := false // checker
-	position := 0 
+	position := 0
 
 	for _, word := range words {
 		indexs := subIndexs(word, substring)
 		if word != "" {
 			for i := 0; i < 8; i++ {
 				for k, char := range word {
-					if validIndex(k, indexs){
+					if validIndex(k, indexs) {
 						result.WriteString(colorCode)
 						sub = true
 						position = k
+
 					}
 					if char == '\n' {
 						continue
@@ -120,13 +119,12 @@ func AsciiArt(words []string, contents2 []string, substring, colorCode string) s
 						return "Error: Input contains non-ASCII characters"
 					}
 					// Calculate the index of 'char' in the ASCII art content2.
-                    index := int(char-' ')*9 + 1 + i
+					index := int(char-' ')*9 + 1 + i
 
 					// Append the corresponding ASCII art line for the character.
 					result.WriteString(contents2[index])
 
-					
-					if sub && k == position+len(substring)-1{
+					if sub && k == position+len(substring)-1 {
 						result.WriteString(reset)
 					}
 
@@ -156,31 +154,30 @@ func AsciiArt(words []string, contents2 []string, substring, colorCode string) s
 	return result.String()
 }
 
-func subIndexs(s, subStr string)[]int{
-    index := []int{}
-    leftCharacters := 0
-    
-    for{
-        idx:= strings.Index(s, subStr)
-        if idx == -1{
-            break
-        }
-        index = append(index, idx+leftCharacters)
-        s = s[idx+len(subStr):]
-        leftCharacters += idx+len(subStr)
-    }
-    return index
+func subIndexs(s, subStr string) []int {
+	index := []int{}
+	leftCharacters := 0
+
+	for len(subStr) > 0 {
+		idx := strings.Index(s, subStr)
+		if idx == -1 {
+			break
+		}
+		index = append(index, idx+leftCharacters)
+		s = s[idx+len(subStr):]
+		leftCharacters += idx + len(subStr)
+	}
+	return index
 }
 
-func validIndex(index int, indexs []int)bool{
-	for _, idx := range indexs{
-		if index == idx{
+func validIndex(index int, indexs []int) bool {
+	for _, idx := range indexs {
+		if index == idx {
 			return true
 		}
 	}
 	return false
 }
-
 
 // func colorSubstring(input, substring, colorCode string) string {
 // 	if substring == "" {
