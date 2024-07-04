@@ -22,52 +22,160 @@ var colors = map[string]string{
 }
 
 func main() {
-	// Define the color flag
+	// Define flags using flag package
 	colorFlag := flag.String("color", "", "color for the substring")
 
 	// Parse flags
 	flag.Parse()
 
-	// Check if enough arguments are provided
-	if *colorFlag == "" || len(flag.Args()) < 1 {
+	// Extract arguments using os package for flexibility
+	args := flag.Args()
+	var substring, inputString, banner string
+
+	// switch len(args) {
+	// case 1:
+	// 	// Case for: go run . <string>
+	// 	inputString = args[0]
+	// case 2:
+	// 	// Case for: go run . <string> <banner>
+	// 	substring = args[0]
+	// 	inputString = args[1]
+
+	// case 3:
+	// 	substring = args[0]
+	// 	inputString = args[1]
+	// 	banner = args[2]
+	// default:
+	// 	printUsage()
+	// 	return
+	// }
+	switch len(args) {
+	case 1:
+		// Case for: go run . <string>
+		inputString = args[0]
+		banner = "standard" // Default banner
+	case 2:
+		// Case for: go run . <string> <banner>
+		inputString = args[0]
+		banner = args[1]
+	default:
 		printUsage()
 		return
 	}
 
-	// Extract arguments
-	args := flag.Args()
-	var substring, inputString string
+	// Initialize colorCode
+	var colorCode string
 
-	if len(args) == 1 {
-		substring = ""
-		inputString = args[0]
-	} else if len(args) == 2 {
-		substring = args[0]
-		inputString = args[1]
-		//inputString = strings.Join(args[1:], " ")
+	// Check if a color flag was provided
+	if *colorFlag != "" {
+		colorCode = colors[*colorFlag]
+		if colorCode == "" {
+			fmt.Printf("Unknown color: %s\n", *colorFlag)
+			return
+		}
+		// If color is provided, use the first word as substring
+		words := strings.Fields(inputString)
+		if len(words) > 0 {
+			substring = words[0]
+		}
 	}
 
-	// Get the color code
-	colorCode, ok := colors[*colorFlag]
-	if !ok {
-		fmt.Printf("Unknown color: %s\n", *colorFlag)
-		return
-	}
-
-	// Read the default banner file (standard)
-	banner, err := readBannerFile("standard")
-	if err != nil {
-		fmt.Printf("Error reading banner file: %v\n", err)
-		return
+	// Read the banner file if specified
+	var bannerContents []string
+	if banner != "" {
+		var err error
+		bannerContents, err = readBannerFile(banner)
+		if err != nil {
+			fmt.Printf("Error reading banner file: %v\n", err)
+			return
+		}
+	} else {
+		// Read the default banner file (standard)
+		var err error
+		bannerContents, err = readBannerFile("standard")
+		if err != nil {
+			fmt.Printf("Error reading banner file: %v\n", err)
+			return
+		}
 	}
 
 	// Generate and color the ASCII art
-	asciiArt := AsciiArt([]string{inputString}, banner, substring, colorCode)
+	asciiArt := AsciiArt([]string{inputString}, bannerContents, substring, colorCode)
 
 	// Print the result
 	fmt.Println(asciiArt)
 }
 
+// func main() {
+// 	// Define flags using flag package
+// 	colorFlag := flag.String("color", "", "color for the substring")
+
+// 	// Parse flags
+// 	flag.Parse()
+
+// 	// Extract arguments using os package for flexibility
+// 	args := flag.Args()
+// 	var substring, inputString, banner string
+
+// 	switch len(args) {
+// 	case 0:
+// 		printUsage()
+// 		return
+// 	case 1:
+// 		substring = ""
+// 		inputString = args[0]
+// 	case 2:
+// 		substring = args[0]
+// 		inputString = args[1]
+// 	case 3:
+// 		substring = args[0]
+// 		inputString = args[1]
+// 		banner = args[2]
+// 	default:
+// 		printUsage()
+// 		return
+// 	}
+
+// 	// Initialize colorCode
+
+// 	var colorCode string
+
+// 	// Check if a color flag was provided
+
+// 	if *colorFlag != "" {
+// 		colorCode = colors[*colorFlag]
+// 		if colorCode == "" {
+// 			fmt.Printf("Unknown color: %s\n", *colorFlag)
+// 			return
+// 		}
+// 	}
+
+// 	// Read the banner file if specified
+// 	var bannerContents []string
+// 	if banner != "" {
+// 		var err error
+// 		bannerContents, err = readBannerFile(banner)
+// 		if err != nil {
+// 			fmt.Printf("Error reading banner file: %v\n", err)
+// 			return
+// 		}
+// 	} else {
+// 		// Read the default banner file (standard)
+// 		var err error
+// 		bannerContents, err = readBannerFile("standard")
+// 		if err != nil {
+// 			fmt.Printf("Error reading banner file: %v\n", err)
+// 			return
+// 		}
+// 	}
+
+// 	// Generate and color the ASCII art
+// 	asciiArt := AsciiArt([]string{inputString}, bannerContents, substring, colorCode)
+
+// 	// Print the result
+// 	fmt.Println(asciiArt)
+
+// }
 func readBannerFile(banner string) ([]string, error) {
 	fileName := banner + ".txt"
 	file, err := os.Open(fileName)
@@ -90,11 +198,8 @@ func AsciiArt(words []string, contents2 []string, substring, colorCode string) s
 	var result strings.Builder
 	reset := "\033[0m" // Reset color code
 
-	fmt.Printf("Colorcode is  %s\n", colorCode)
-	fmt.Printf("Substring is  %s\n", substring)
-
 	countSpace := 0
-	sub := false // checker
+	sub := false
 	position := 0
 
 	for _, word := range words {
@@ -102,11 +207,10 @@ func AsciiArt(words []string, contents2 []string, substring, colorCode string) s
 		if word != "" {
 			for i := 0; i < 8; i++ {
 				for k, char := range word {
-					if validIndex(k, indexs) {
+					if validIndex(k, indexs) && colorCode != "" {
 						result.WriteString(colorCode)
 						sub = true
 						position = k
-
 					}
 					if char == '\n' {
 						continue
@@ -114,29 +218,12 @@ func AsciiArt(words []string, contents2 []string, substring, colorCode string) s
 					if !(char >= 32 && char <= 126) {
 						return "Error: Input contains non-ASCII characters"
 					}
-					// Calculate the index of 'char' in the ASCII art content2.
 					index := int(char-' ')*9 + 1 + i
-
-					// Append the corresponding ASCII art line for the character.
 					result.WriteString(contents2[index])
 
 					if sub && k == position+len(substring)-1 {
 						result.WriteString(reset)
 					}
-
-					// line := contents2[index]
-
-					// fmt.Println("Original line is", line)
-
-					// Apply color to all substring occurrences in line
-					// if substring != "" && strings.Contains(line, substring) {
-					// 	// Replace all the occurrences(hence the -1) of the substring with the colored substring and then reset code
-					// 	coloredLine := strings.Replace(line, substring, colorCode+substring+reset, -1)
-					// 	fmt.Println("Colored line is", coloredLine)
-					// 	result.WriteString(coloredLine)
-					// } else {
-					// 	result.WriteString(line)
-					// }
 				}
 				result.WriteString("\n")
 			}
@@ -176,9 +263,161 @@ func validIndex(index int, indexs []int) bool {
 }
 
 func printUsage() {
-	fmt.Println("Usage: go run . [OPTION] [STRING]\n\nEX: go run . --color=<color> <substring to be colored> \"something\"")
-
+	fmt.Println("Usage:")
+	fmt.Println("  To colorize a substring in ASCII art:")
+	fmt.Println("    go run . --color=<color> <substring to be colored>")
+	fmt.Println("  To specify a custom banner file:")
+	fmt.Println("    go run . <substring to be colored> <banner>")
+	fmt.Println("  Example:")
+	fmt.Println("    go run . --color=red hello")
+	fmt.Println("    go run . hello standard")
 }
+
+// func main() {
+// 	// Define the color flag
+// 	colorFlag := flag.String("color", "", "color for the substring")
+
+// 	// Parse flags
+// 	flag.Parse()
+
+// 	// Check if enough arguments are provided
+// 	if *colorFlag == "" || len(flag.Args()) < 1 {
+// 		printUsage()
+// 		return
+// 	}
+
+// 	// Extract arguments
+// 	args := flag.Args()
+// 	var substring, inputString string
+
+// 	if len(args) == 1 {
+// 		substring = ""
+// 		inputString = args[0]
+// 	} else if len(args) == 2 {
+// 		substring = args[0]
+// 		inputString = args[1]
+// 		//inputString = strings.Join(args[1:], " ")
+// 	}
+
+// 	// Get the color code
+// 	colorCode, ok := colors[*colorFlag]
+// 	if !ok {
+// 		fmt.Printf("Unknown color: %s\n", *colorFlag)
+// 		return
+// 	}
+
+// 	// Read the default banner file (standard)
+// 	banner, err := readBannerFile("standard")
+// 	if err != nil {
+// 		fmt.Printf("Error reading banner file: %v\n", err)
+// 		return
+// 	}
+
+// 	// Generate and color the ASCII art
+// 	asciiArt := AsciiArt([]string{inputString}, banner, substring, colorCode)
+
+// 	// Print the result
+// 	fmt.Println(asciiArt)
+// }
+
+// func readBannerFile(banner string) ([]string, error) {
+// 	fileName := banner + ".txt"
+// 	file, err := os.Open(fileName)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer file.Close()
+
+// 	var contents []string
+// 	scanner := bufio.NewScanner(file)
+
+// 	for scanner.Scan() {
+// 		contents = append(contents, scanner.Text())
+// 	}
+
+// 	return contents, scanner.Err()
+// }
+
+// func AsciiArt(words []string, contents2 []string, substring, colorCode string) string {
+// 	var result strings.Builder
+// 	reset := "\033[0m" // Reset color code
+
+// 	fmt.Printf("Colorcode is  %s\n", colorCode)
+// 	fmt.Printf("Substring is  %s\n", substring)
+
+// 	countSpace := 0
+// 	sub := false // checker
+// 	position := 0
+
+// 	for _, word := range words {
+// 		indexs := subIndexs(word, substring)
+// 		if word != "" {
+// 			for i := 0; i < 8; i++ {
+// 				for k, char := range word {
+// 					if validIndex(k, indexs) {
+// 						result.WriteString(colorCode)
+// 						sub = true
+// 						position = k
+
+// 					}
+// 					if char == '\n' {
+// 						continue
+// 					}
+// 					if !(char >= 32 && char <= 126) {
+// 						return "Error: Input contains non-ASCII characters"
+// 					}
+// 					// Calculate the index of 'char' in the ASCII art content2.
+// 					index := int(char-' ')*9 + 1 + i
+
+// 					// Append the corresponding ASCII art line for the character.
+// 					result.WriteString(contents2[index])
+
+// 					if sub && k == position+len(substring)-1 {
+// 						result.WriteString(reset)
+// 					}
+
+// 				}
+// 				result.WriteString("\n")
+// 			}
+// 		} else {
+// 			countSpace++
+// 			if countSpace < len(words) {
+// 				result.WriteString("\n")
+// 			}
+// 		}
+// 	}
+// 	return result.String()
+// }
+
+// func subIndexs(s, subStr string) []int {
+// 	index := []int{}
+// 	leftCharacters := 0
+
+// 	for len(subStr) > 0 {
+// 		idx := strings.Index(s, subStr)
+// 		if idx == -1 {
+// 			break
+// 		}
+// 		index = append(index, idx+leftCharacters)
+// 		s = s[idx+len(subStr):]
+// 		leftCharacters += idx + len(subStr)
+// 	}
+// 	return index
+// }
+
+// func validIndex(index int, indexs []int) bool {
+// 	for _, idx := range indexs {
+// 		if index == idx {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }
+
+// func printUsage() {
+// 	fmt.Println("Usage: go run . [OPTION] [STRING]\n\nEX: go run . --color=<color> <substring to be colored> \"something\"")
+
+// }
 
 // func colorSubstring(input, substring, colorCode string) string {
 // 	if substring == "" {
