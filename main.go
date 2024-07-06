@@ -28,62 +28,58 @@ func main() {
 	// Parse flags
 	flag.Parse()
 
-	// Extract arguments using os package for flexibility
+	// Extract arguments using flag.Args()
 	args := flag.Args()
+
 	var substring, inputString, banner string
-
-	// switch len(args) {
-	// case 1:
-	// 	// Case for: go run . <string>
-	// 	inputString = args[0]
-	// case 2:
-	// 	// Case for: go run . <string> <banner>
-	// 	substring = args[0]
-	// 	inputString = args[1]
-
-	// case 3:
-	// 	substring = args[0]
-	// 	inputString = args[1]
-	// 	banner = args[2]
-	// default:
-	// 	printUsage()
-	// 	return
-	// }
-	switch len(args) {
-	case 1:
-		// Case for: go run . <string>
-		inputString = args[0]
-		banner = "standard" // Default banner
-	case 2:
-		// Case for: go run . <string> <banner>
-		inputString = args[0]
-		banner = args[1]
-	default:
-		printUsage()
-		return
-	}
-
-	// Initialize colorCode
 	var colorCode string
 
-	// Check if a color flag was provided
 	if *colorFlag != "" {
-		colorCode = colors[*colorFlag]
-		if colorCode == "" {
+		// Case for: go run . --color=<color> <substring> <string>
+		if len(args) == 1 {
+			inputString = args[0]
+			substring = args[0]
+		} else if len(args) == 2 {
+			substring = args[0]
+			inputString = args[1]
+		} else {
+			printUsage()
+			return
+		}
+
+		// Check if the provided color is valid
+		var ok bool
+		colorCode, ok = colors[*colorFlag]
+		if !ok {
 			fmt.Printf("Unknown color: %s\n", *colorFlag)
 			return
 		}
-		// If color is provided, use the first word as substring
-		words := strings.Fields(inputString)
-		if len(words) > 0 {
-			substring = words[0]
+	} else {
+		// Handle cases without the --color flag
+		switch len(args) {
+		case 1:
+			// Case for: go run . <string>
+			inputString = args[0]
+		case 2:
+			// Case for: go run . <string> <banner>
+			inputString = args[0]
+			banner = args[1]
+		// case 3:
+		// 	// Case for: go run . <substring> <string> <banner>
+		// 	substring = args[0]
+		// 	inputString = args[1]
+		// 	banner = args[2]
+		default:
+			printUsage()
+			return
 		}
 	}
 
 	// Read the banner file if specified
 	var bannerContents []string
+	var err error
+
 	if banner != "" {
-		var err error
 		bannerContents, err = readBannerFile(banner)
 		if err != nil {
 			fmt.Printf("Error reading banner file: %v\n", err)
@@ -91,7 +87,6 @@ func main() {
 		}
 	} else {
 		// Read the default banner file (standard)
-		var err error
 		bannerContents, err = readBannerFile("standard")
 		if err != nil {
 			fmt.Printf("Error reading banner file: %v\n", err)
@@ -105,6 +100,97 @@ func main() {
 	// Print the result
 	fmt.Println(asciiArt)
 }
+
+// func main() {
+// 	// Define flags using flag package
+// 	colorFlag := flag.String("color", "", "color for the substring")
+
+// 	// Parse flags
+// 	flag.Parse()
+
+// 	// Extract arguments using os package for flexibility
+// 	args := flag.Args()
+// 	fmt.Println(len(args))
+// 	fmt.Println(args)
+// 	var substring, inputString, banner string
+//     var colorCode string
+
+// 	// switch len(args) {
+// 	// case 1:
+// 	// 	// Case for: go run . <string>
+// 	// 	inputString = args[0]
+// 	// case 2:
+// 	// 	// Case for: go run . <string> <banner>
+// 	// 	inputString = args[0]
+
+// 	// 	banner = args[1]
+
+// 	// case 3:
+// 	// 	substring = args[0]
+// 	// 	inputString = args[1]
+// 	// 	banner = args[2]
+// 	// default:
+// 	// 	printUsage()
+// 	// 	return
+// 	// }
+// 	// switch len(args) {
+// 	// case 1:
+// 	// 	// Case for: go run . <string>
+// 	// 	inputString = args[0]
+// 	// 	banner = "standard" // Default banner
+// 	// case 2:
+// 	// 	// Case for: go run . <string> <banner>
+// 	// 	substring = args[0]
+// 	// 	inputString = args[1]
+
+// 	// 	// banner = args[1]
+
+// 	// default:
+// 	// 	printUsage()
+// 	// 	return
+// 	// }
+
+// 	// Initialize colorCode
+
+// 	// Check if a color flag was provided
+// 	if *colorFlag != "" {
+// 		colorCode = colors[*colorFlag]
+// 		if colorCode == "" {
+// 			fmt.Printf("Unknown color: %s\n", *colorFlag)
+// 			return
+// 		}
+// 		// If color is provided, use the first word as substring
+// 		words := strings.Fields(inputString)
+// 		if len(words) > 0 {
+// 			substring = words[0]
+// 		}
+// 	}
+
+// 	// Read the banner file if specified
+// 	var bannerContents []string
+// 	if banner != "" {
+// 		var err error
+// 		bannerContents, err = readBannerFile(banner)
+// 		if err != nil {
+// 			fmt.Printf("Error reading banner file: %v\n", err)
+// 			return
+// 		}
+// 	} else {
+// 		// Read the default banner file (standard)
+// 		var err error
+// 		bannerContents, err = readBannerFile("standard")
+// 		if err != nil {
+// 			fmt.Printf("Error reading banner file: %v\n", err)
+// 			return
+// 		}
+// 	}
+
+// 	// Generate and color the ASCII art
+// 	asciiArt := AsciiArt([]string{inputString}, bannerContents, substring, colorCode)
+
+// 	// Print the result
+// 	fmt.Println(asciiArt)
+// }
 
 // func main() {
 // 	// Define flags using flag package
