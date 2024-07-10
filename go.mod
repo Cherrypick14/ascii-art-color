@@ -1,3 +1,3 @@
-module collors
+module color
 
 go 1.18
