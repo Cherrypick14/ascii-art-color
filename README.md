@@ -84,7 +84,7 @@ go test -v
 ## Authors
 
 - [@Cherrypick14](https://github.com/Cherrypick14)
-- [@skisenge](https://learn.zone01kisumu.ke/git/skisenge)
+- [@stkisengese](https://github.com/stkisengese)
 
 ## References
 For more different custom color combinations that you can't find in the project, you can check out using this format:
