@@ -5,8 +5,6 @@ This command-line tool allows users to colorize text strings, either entirely or
 
 
 
-
-
 ## Installation
 
 Prerequisites:
@@ -16,9 +14,8 @@ Go 1.18 or higher installed Git installed Operating System: Windows, macOS, Linu
 Download/Clone:
 
 ```bash
-  $ git clone https://learn.zone01kisumu.ke/git/cowalla/ascii-art-color
+  $ git clone https://github.com/Cherrypick14/ascii-art-color.git
 ```
-
 
 ## Features
 
@@ -86,7 +83,7 @@ go test -v
 
 ## Authors
 
-- [@cowalla](https://learn.zone01kisumu.ke/git/cowalla)
+- [@Cherrypick14](https://github.com/Cherrypick14)
 - [@skisenge](https://learn.zone01kisumu.ke/git/skisenge)
 
 ## References
